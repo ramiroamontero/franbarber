@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GoogleCalendarController;
+use App\Http\Controllers\Voyager\VoyagerAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,4 +22,10 @@ Route::get('/', function () {
 
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
+    Route::post('login/google', [VoyagerAuthController::class, 'googleLogin'])->name('voyager.google.login');
 });
+
+Route::get('auth/google', [GoogleCalendarController::class, 'redirectToGoogle']);
+Route::get('auth/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback']);
+Route::post('events', [GoogleCalendarController::class, 'storeEvent'])->name('events.store');
+Route::get('events', [GoogleCalendarController::class, 'showEvents'])->name('events.index');
