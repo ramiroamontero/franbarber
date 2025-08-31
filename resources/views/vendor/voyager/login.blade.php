@@ -39,14 +39,11 @@
         </form>
 
         <div style="clear:both">
-            <form action="{{ route('voyager.google.login') }}" method="POST">
-                {{ csrf_field() }}
-                <button type="submit" class="btn btn-danger">
-                    <span class="signingin hidden"><span class="voyager-refresh"></span>
-                        {{ __('voyager::login.loggingin') }}...</span>
-                    <span>Iniciar sesión con Google</span>
-                </button>
-            </form>
+            <a href="{{ route('google.redirect') }}" class="btn btn-danger">
+                <span class="signingin hidden"><span class="voyager-refresh"></span>
+                    {{ __('voyager::login.loggingin') }}...</span>
+                <span>Iniciar sesión con Google</span>
+            </a>
         </div>
 
         @if (!$errors->isEmpty())
