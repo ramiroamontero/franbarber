@@ -2,46 +2,45 @@
 
 namespace App\Http\Controllers\Voyager;
 
-use Illuminate\Http\Request;
-use App\Models\User;
 use TCG\Voyager\Http\Controllers\VoyagerAuthController as BaseVoyagerAuthController;
+use App\Models\User;
+use Socialite;
+use TCG\Voyager\Facades\Voyager;
 
 class VoyagerAuthController extends BaseVoyagerAuthController
 {
-    protected function validateLogin(Request $request)
+    public function login()
     {
-        $request->validate([
-            $this->username() => 'required|string',
-            'password' => 'required|string',
-        ]);
+        if ($this->guard()->user()) {
+            return redirect()->route('voyager.dashboard');
+        }
+
+        return Voyager::view('voyager::login');
     }
 
-    public function googleLogin()
+    public function redirectToGoogle()
     {
-        return \Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->redirect();
     }
 
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = \Socialite::driver('google')->stateless()->user();
+            $googleUser = Socialite::driver('google')->stateless()->user();
         } catch (\Exception $e) {
-            return redirect()->route('voyager.login')->withErrors(['google' => 'Google authentication failed.']);
+            return redirect()
+                ->route('voyager.login')
+                ->withErrors(['google' => 'Google authentication failed.']);
         }
 
-        // Find or create user logic (customize as needed)
-        $user = User::where('email', $googleUser->getEmail())->first();
-
-        if (!$user) {
-            $user = User::create([
-                'name' => $googleUser->getName(),
-                'email' => $googleUser->getEmail(),
-                'password' => bcrypt(str()->random(16)),
-                // Add other fields if needed
-            ]);
-        }
+        $user = User::updateOrCreate(['email' => $googleUser->email], [
+            'name' => $googleUser->name,
+            'password' => bcrypt(str()->random(16)),
+            'google_id' => $googleUser->id,
+        ]);
 
         auth()->login($user);
+        session(['google_token' => $googleUser->token]);
 
         return redirect()->intended(route('voyager.dashboard'));
     }
