@@ -1,18 +1,5 @@
 @extends('layouts.app')
 
-@section('css')
-    @import
-    url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png');
-    button {
-    font-family: 'Inter', sans-serif;
-    background-color: #f0f2f5;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    }
-@endsection
-
 @section('content')
     <div class="container">
         <div class="row justify-content-center">
