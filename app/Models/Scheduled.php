@@ -28,7 +28,7 @@ class Scheduled extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'vendor.voyager.mail.scheduled',
+            view: 'mail.scheduled',
             with: [
                 'name' => $this->name,
                 'date' => $this->date,
