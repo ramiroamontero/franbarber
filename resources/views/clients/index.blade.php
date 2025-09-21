@@ -1,10 +1,5 @@
 @extends('layouts.app')
 
-<head>
-    <meta charset='utf-8' />
-    <link href='https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.min.css' rel='stylesheet' />
-</head>
-
 @section(section: 'content')
     <div class="container">
         <div class="row justify-content-center">
@@ -60,13 +55,13 @@
                             </div>
                         </div>
                         <div class="col-12 d-flex justify-content-end">
-                            <a href="#" id="client-modal" type="button" class="btn btn-primary shadow">
+                            <a href="#" id="client-modal" type="button" class="btn btn-secondary shadow">
                                 Crear Cliente
                             </a>
                         </div>
                         <div class="col-12">
                             <div id="datatable">
-                                <table id="myTable" class="table">
+                                <table id="clients-table" class="table">
                                     <thead>
                                         <tr>
                                             <th>Nombre</th>
@@ -85,6 +80,9 @@
         </div>
     </div>
 @endsection
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" type="text/javascript"></script>
+<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
         const modalElement = $('#modal-container')[0];
@@ -98,7 +96,6 @@
         // Listen for the form submission
         $('#create-client').on('click', function(event) {
             event.preventDefault();
-
             // The jQuery AJAX POST request with values from form
             $.ajax({
                 url: '/clients',
@@ -113,19 +110,43 @@
                     email: $('#email').val(),
                     phone: $('#phone').val()
                 }),
-
                 // This function runs if the request is successful
                 success: function(response) {
                     alert('El cliente fue cargado con éxito');
                     location.reload();
                 },
-
                 // This function runs if the request fails
                 error: function(xhr, status, error) {
                     console.error('Error:', error);
                     $('#response').text('Error: Could not reach the server.');
                 }
             });
+        });
+
+        $('#clients-table').DataTable({
+            searching: false,
+            lengthChange: false,
+            ajax: {
+                url: '/clients/datatable',
+                type: 'GET'
+            },
+            language: {
+                url: '//cdn.datatables.net/plug-ins/2.3.4/i18n/es-ES.json',
+            },
+            columnDefs: [{
+                "defaultContent": "-",
+                "targets": "_all"
+            }],
+            columns: [{
+                    data: 'name',
+                },
+                {
+                    data: 'email',
+                },
+                {
+                    data: 'phone',
+                }
+            ]
         });
     });
 </script>

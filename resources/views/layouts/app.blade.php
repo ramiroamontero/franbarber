@@ -19,6 +19,7 @@
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
+
 <body>
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
@@ -28,16 +29,18 @@
                         {{ config('app.name', 'Franbarber') }}
                     </a>
                 </div>
-                <div class="col-md-1">
-                    <a class="navbar-brand" href="{{ route('appointments.index') }}">
-                        Agenda
-                    </a>
-                </div>
-                <div class="col-md-1">
-                    <a class="navbar-brand" href="{{ route('clients.index') }}">
-                        Clientes
-                    </a>
-                </div>
+                @if (Auth::user())
+                    <div class="col-md-1">
+                        <a class="navbar-brand" href="{{ route('appointments.index') }}">
+                            Agenda
+                        </a>
+                    </div>
+                    <div class="col-md-1">
+                        <a class="navbar-brand" href="{{ route('clients.index') }}">
+                            Clientes
+                        </a>
+                    </div>
+                @endif
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
@@ -96,12 +99,9 @@
 
 </html>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
 </script>
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js'></script>
-<script src="https://cdn.datatables.net/2.3.4/js/dataTables.min.js"></script>
 <script>
     const logout = () => {
         event.preventDefault();

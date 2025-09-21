@@ -24,6 +24,7 @@
 
                                     <!-- Modal Body -->
                                     <div class="modal-body pt-0 pb-4">
+                                        <meta name="csrf-token" content="{{ csrf_token() }}">
                                         <div class="mb-3">
                                             <label for="date" class="form-label text-secondary mb-1">El rango de fecha
                                                 elegido es:</label>
@@ -31,19 +32,31 @@
                                                 class="form-control bg-light text-muted" value="2023-10-26 a 2023-10-28">
                                         </div>
                                         <div class="mb-3">
-                                            <label for="email" class="form-label text-secondary mb-1">Email del
-                                                usuario:</label>
-                                            <input type="email" id="email" placeholder="ej. usuario@ejemplo.com"
-                                                class="form-control">
+                                            <label for="client" class="form-label text-secondary mb-1"></label>
+                                            <select name="clients" id="clientId" class="form-control">
+                                                <option value="">Elegí un cliente</option>
+                                                @foreach ($clients as $client)
+                                                    <option value="{{ $client->id }}"
+                                                        @if (isset($selectedValue) && $selectedValue == $key) selected @endif>
+                                                        {{ $client->name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="comments"
+                                                class="form-label text-secondary mb-1">Comentarios:</label>
+                                            <input type="textbox" id="comments" class="form-control bg-light text-muted"
+                                                placeholder="Comentarios adicionales">
                                         </div>
                                     </div>
 
                                     <!-- Modal Footer -->
                                     <div class="modal-footer border-0 d-flex justify-content-end pt-0">
-                                        <button type="button" class="btn btn-primary rounded-pill shadow"
-                                            data-bs-dismiss="modal">
-                                            Enviar
-                                        </button>
+                                        <a href="#" id="create-appointment" type="button"
+                                            class="btn btn-primary rounded-pill shadow" data-bs-dismiss="modal">
+                                            Guardar
+                                        </a>
                                     </div>
 
                                 </div>
@@ -57,11 +70,8 @@
     </div>
 @endsection
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-    xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
-</script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" type="text/javascript"></script>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.19/index.global.min.js'></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
     $(document).ready(function() {
         const modalElement = $('#modal-container')[0];
@@ -71,14 +81,22 @@
             myModal.show();
         };
 
-        const dateInput = document.getElementById('date');
         const calendarEl = document.getElementById('calendar');
         const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridWeek',
+            initialView: 'timeGridDay',
+            views: {
+                timeGridDay: {
+                    type: 'agenda',
+                    duration: {
+                        days: 4
+                    },
+                    buttonText: '4 day list'
+                }
+            },
             slotMinTime: '10:00:00',
             slotMaxTime: '20:30:00',
             slotDuration: '00:10:00',
-            events: @json($appointments),
+            events: '/appointments/appointments',
             selectable: true,
             locale: 'es',
             dateClick: function(info) {
@@ -89,31 +107,29 @@
         calendar.render();
 
         // Listen for the form submission
-        $('#create-appointment').on('submit', function(event) {
+        $('#create-appointment').on('click', function(event) {
             // Prevent the default form submission which reloads the page
             event.preventDefault();
 
-            // Get the values from the input fields
-            var date = $('#date').val();
-            var email = $('#email').val();
-
-            // The data we are sending to the server
-            var dataToSend = {
-                date,
-                email
-            };
-
             // The jQuery AJAX POST request
             $.ajax({
-                url: '/api/save-data', // The endpoint on your server
+                url: '/appointments',
                 method: 'POST',
-                contentType: 'application/json', // Tell the server we're sending JSON
-                data: JSON.stringify(dataToSend), // Convert the JS object to a JSON string
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                        .getAttribute('content')
+                },
+                data: JSON.stringify({
+                    date: $('#date').val(),
+                    clientId: $('#clientId').val(),
+                    comments: $('#comments').val()
+                }), // Convert the JS object to a JSON string
 
                 // This function runs if the request is successful
                 success: function(response) {
-                    console.log('Success:', response);
-                    $('#response').text('Success! Server responded: ' + response.message);
+                    alert('La cita fue creada con éxito!');
+                    location.reload();
                 },
 
                 // This function runs if the request fails
