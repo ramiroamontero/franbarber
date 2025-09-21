@@ -1,9 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\GoogleCalendarController;
-use App\Http\Controllers\Voyager\VoyagerAuthController;
-use App\Http\Controllers\Voyager\VoyagerController;
+use App\Http\Controllers\AppointmentsController;
+use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ClientsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,30 +16,27 @@ use App\Http\Controllers\Voyager\VoyagerController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Route::group(['prefix' => 'auth'], function () {
 
-    Route::get('google/redirect', [VoyagerAuthController::class, 'redirectToGoogle'])->name('google.redirect');
-    Route::get('google/callback', [VoyagerAuthController::class, 'handleGoogleCallback'])->name('google.callback');
+    Route::get('google/redirect', [AuthController::class, 'redirectToGoogle'])->name('google.redirect');
+    Route::get('google/callback', [AuthController::class, 'handleGoogleCallback'])->name('google.callback');
 });
 
-Route::group(['prefix' => 'admin', 'middleware' => 'auth'], function () {
 
-    Voyager::routes();
+Route::group(['prefix' => 'appointments',  'middleware' => ['auth', 'cors']], function () {
+    Route::get('', [AppointmentsController::class, 'index'])->name('appointments.index');
+    Route::get('appointments', [AppointmentsController::class, 'appointments'])->name('appointments.appointments');
+    Route::post('', [AppointmentsController::class, 'store'])->name('appointments.store');
+});
 
-    Route::get('/login', [VoyagerAuthController::class, 'login'])->name('voyager.login')->withoutMiddleware('auth');
-    Route::get('/dashboard', [VoyagerController::class, 'index'])->name('voyager.dashboard');
-    Route::post('/logout', [VoyagerController::class, 'logout'])->name('voyager.logout');
+Route::group(['prefix' => 'clients', 'middleware' => ['auth', 'cors']], function () {
+    Route::get('', [ClientsController::class, 'index'])->name('clients.index');
+    Route::get('datatable', [ClientsController::class, 'datatable'])->name('clients.datatable');
+    Route::post('', [ClientsController::class, 'store'])->name('clients.store');
+});
 
+Route::group(['middleware' => ['cors']], function () {
+    Auth::routes();
 
-    Route::group(['prefix' => 'calendar'], function () {
-
-        Route::get('auth/google', [GoogleCalendarController::class, 'redirectToGoogle']);
-        Route::get('auth/google/callback', [GoogleCalendarController::class, 'handleGoogleCallback']);
-        Route::get('', [GoogleCalendarController::class, 'list'])->name('calendar.index');
-        Route::post('', [GoogleCalendarController::class, 'post'])->name('calendar.store');
-    });
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 });
